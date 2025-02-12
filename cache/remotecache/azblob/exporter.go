@@ -32,12 +32,12 @@ func ResolveCacheExporterFunc() remotecache.ResolveCacheExporterFunc {
 	return func(ctx context.Context, g session.Group, attrs map[string]string) (remotecache.Exporter, error) {
 		config, err := getConfig(attrs)
 		if err != nil {
-			return nil, errors.WithMessage(err, "failed to create azblob config")
+			return nil, errors.Wrap(err, "failed to create azblob config")
 		}
 
 		containerClient, err := createContainerClient(ctx, config)
 		if err != nil {
-			return nil, errors.WithMessage(err, "failed to create container client")
+			return nil, errors.Wrap(err, "failed to create container client")
 		}
 
 		cc := v1.NewCacheChains()
@@ -84,11 +84,11 @@ func (ce *exporter) Finalize(ctx context.Context) (map[string]string, error) {
 		}
 		dgst, err := digest.Parse(v)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to parse uncompressed annotation")
+			return nil, errors.Wrap(err, "failed to parse uncompressed annotation")
 		}
 		diffID = dgst
 
-		key := blobKey(ce.config, dgstPair.Descriptor.Digest.String())
+		key := blobKey(ce.config, dgstPair.Descriptor.Digest)
 
 		exists, err := blobExists(ctx, ce.containerClient, key)
 		if err != nil {

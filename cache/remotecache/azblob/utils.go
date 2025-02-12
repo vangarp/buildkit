@@ -13,6 +13,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/blob"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/bloberror"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/container"
+	"github.com/opencontainers/go-digest"
 	"github.com/pkg/errors"
 )
 
@@ -166,8 +167,8 @@ func manifestKey(config *Config, name string) string {
 	return key
 }
 
-func blobKey(config *Config, digest string) string {
-	key := filepath.Join(config.Prefix, config.BlobsPrefix, digest)
+func blobKey(config *Config, digest digest.Digest) string {
+	key := filepath.Join(config.Prefix, config.BlobsPrefix, digest.String())
 	return key
 }
 

@@ -30,12 +30,12 @@ func ResolveCacheImporterFunc() remotecache.ResolveCacheImporterFunc {
 	return func(ctx context.Context, g session.Group, attrs map[string]string) (remotecache.Importer, ocispecs.Descriptor, error) {
 		config, err := getConfig(attrs)
 		if err != nil {
-			return nil, ocispecs.Descriptor{}, errors.WithMessage(err, "failed to create azblob config")
+			return nil, ocispecs.Descriptor{}, errors.Wrap(err, "failed to create azblob config")
 		}
 
 		containerClient, err := createContainerClient(ctx, config)
 		if err != nil {
-			return nil, ocispecs.Descriptor{}, errors.WithMessage(err, "failed to create container client")
+			return nil, ocispecs.Descriptor{}, errors.Wrap(err, "failed to create container client")
 		}
 
 		importer := &importer{
@@ -182,7 +182,7 @@ type fetcher struct {
 }
 
 func (f *fetcher) Fetch(ctx context.Context, desc ocispecs.Descriptor) (io.ReadCloser, error) {
-	key := blobKey(f.config, desc.Digest.String())
+	key := blobKey(f.config, desc.Digest)
 	exists, err := blobExists(ctx, f.containerClient, key)
 	if err != nil {
 		return nil, err
@@ -227,7 +227,7 @@ func (p *ciProvider) Info(ctx context.Context, dgst digest.Digest) (content.Info
 	p.checkMutex.Lock()
 	defer p.checkMutex.Unlock()
 
-	key := blobKey(p.config, dgst.String())
+	key := blobKey(p.config, dgst)
 	exists, err := blobExists(ctx, p.containerClient, key)
 	if err != nil {
 		return content.Info{}, err
